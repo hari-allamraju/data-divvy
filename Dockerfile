@@ -8,4 +8,4 @@ WORKDIR /app
 COPY . /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install tensorflow flask
+RUN pip install -r requirements.txt
