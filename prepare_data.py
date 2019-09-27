@@ -1,12 +1,13 @@
 import pandas as pd
 import os
+from sqlalchemy import create_engine
 
 print("Reading csv files")
 
 files=[]
 for r, d, f in os.walk("./data"):
     for file in f:
-        if not '.zip' in file:
+        if (not '.zip' in file) and (not '.db' in file):
             files.append(os.path.join(r, file))
 
 df = pd.concat([pd.read_csv(f) for f in files],sort=True)
@@ -17,7 +18,19 @@ tos=df[['to_station_id','to_station_name']]
 tos.columns=['id','name']
 all_stations = pd.concat([froms,tos],sort=True).drop_duplicates()
 
-print (all_stations)
+starts = df[['from_station_id','start_time']]
+starts['action']=-1
+starts.columns = ['id','time','action']
+ends = df[['to_station_id','end_time']]
+ends['action']=1
+ends.columns = ['id','time','action']
+availability=pd.concat([starts,ends],sort=True).groupby(['time','id']).sum()
+
+engine = create_engine("sqlite:///data/divy.db")
+
+df.to_sql('data',engine,if_exists='replace')
+all_stations.to_sql('stations',engine,if_exists='replace')
+availability.to_sql('availability',engine,if_exists='replace')
 
 
 
