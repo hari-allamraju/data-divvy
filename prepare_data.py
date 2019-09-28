@@ -12,6 +12,9 @@ for r, d, f in os.walk("./data"):
 
 df = pd.concat([pd.read_csv(f) for f in files],sort=True)
 
+df['start_time']=pd.to_datetime(df['start_time'])
+df['end_time']=pd.to_datetime(df['end_time'])
+
 froms=df[['from_station_id','from_station_name']]
 froms.columns=['id','name']
 tos=df[['to_station_id','to_station_name']]
@@ -24,7 +27,9 @@ starts.columns = ['id','time','action']
 ends = df[['to_station_id','end_time']]
 ends['action']=1
 ends.columns = ['id','time','action']
-availability=pd.concat([starts,ends],sort=True).groupby(['time','id']).sum()
+availability=pd.concat([starts,ends],sort=True).groupby(['time','id']).sum().reset_index()
+availability['date']=[x.date() for x in availability['time']]
+availability['isodayofweek']=[x.isoweekday() for x in availability['date']]
 
 engine = create_engine("sqlite:///data/divy.db")
 
