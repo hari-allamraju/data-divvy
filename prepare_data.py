@@ -29,7 +29,10 @@ ends['action']=1
 ends.columns = ['id','time','action']
 availability=pd.concat([starts,ends],sort=True).groupby(['time','id']).sum().reset_index()
 availability['date']=[x.date() for x in availability['time']]
+availability['time']=[x.time() for x in availability['time']]
 availability['isodayofweek']=[x.isoweekday() for x in availability['date']]
+availability['hour']=[x.hour for x in availability['time']]
+availability['minute']=[x.minute for x in availability['time']]
 
 engine = create_engine("sqlite:///data/divy.db")
 
